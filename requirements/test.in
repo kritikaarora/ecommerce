@@ -7,6 +7,7 @@ coverage
 ddt
 diff-cover
 django-webtest
+edx-i18n-tools
 factory-boy
 freezegun
 futures ; python_version == "2.7"
@@ -25,4 +26,3 @@ pysqlite ; python_version == "2.7"  # DB-API 2.0 interface for SQLite 3.x (used 
 responses
 selenium
 testfixtures                # Provides a LogCapture utility used by several tests
-edx-i18n-tools
