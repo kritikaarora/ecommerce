@@ -114,6 +114,18 @@ class BasketAddItemsView(View):
         except AlreadyPlacedOrderException:
             return render(request, 'edx/error.html', {'error': _('You have already purchased these products')})
         url = add_utm_params_to_url(reverse('basket:summary'), self.request.GET.items())
+        try:
+            import braintree
+            partner_short_code = request.site.siteconfiguration.partner.short_code
+            braintree_config = settings.PAYMENT_PROCESSOR_CONFIG[partner_short_code.lower()]['braintree']
+            braintree.Configuration.configure(braintree.Environment.Sandbox,
+                                              merchant_id=braintree_config['merchant_id'],
+                                              public_key=braintree_config['public_key'],
+                                              private_key=braintree_config['private_key'])
+            request.session['braintree_client_token'] = braintree.ClientToken.generate()
+            logger.error(' braintree client token generated[%s].', request.session['braintree_client_token'])
+        except Exception as e:
+            logger.error('error while braintree client token generation[%s].', e)
         return HttpResponseRedirect(url, status=303)
 
 
