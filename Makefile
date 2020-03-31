@@ -1,6 +1,7 @@
 NODE_BIN=./node_modules/.bin
 DIFF_COVER_BASE_BRANCH=master
 PYTHON_ENV=py35
+DJANGO_ENV=django111
 
 help:
 	@echo ''
@@ -82,7 +83,7 @@ validate_js:
 	$(NODE_BIN)/gulp lint
 
 validate_python: clean requirements.tox
-	tox -e $(PYTHON_ENV)-tests
+	tox -e $(PYTHON_ENV)-${DJANGO_ENV}-tests
 
 fast_validate_python: clean requirements.tox
 	DISABLE_ACCEPTANCE_TESTS=True tox -e $(PYTHON_ENV)-tests
@@ -151,6 +152,9 @@ upgrade: ## update the requirements/*.txt files with the latest packages satisfy
 	pip-compile --rebuild --upgrade -o requirements/test.txt requirements/test.in
 	pip-compile --rebuild --upgrade -o requirements/dev.txt requirements/dev.in
 	pip-compile --rebuild --upgrade -o requirements/production.txt requirements/production.in
+	# Let tox control the Django version for tests
+	sed '/^[dD]jango==/d' requirements/test.txt > requirements/test.tmp
+	mv requirements/test.tmp requirements/test.txt
 
 # Targets in a Makefile which do not produce an output file with the same name as the target name
 .PHONY: help requirements migrate serve clean validate_python quality validate_js validate html_coverage e2e \
