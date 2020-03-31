@@ -1,7 +1,7 @@
 NODE_BIN=./node_modules/.bin
 DIFF_COVER_BASE_BRANCH=master
 PYTHON_ENV=py35
-DJANGO_ENV=django111
+TOXENV=django111-tests
 
 help:
 	@echo ''
@@ -83,10 +83,10 @@ validate_js:
 	$(NODE_BIN)/gulp lint
 
 validate_python: clean requirements.tox
-	tox -e $(PYTHON_ENV)-${DJANGO_ENV}-tests
+	tox -e $(PYTHON_ENV)-${TOXENV}
 
 fast_validate_python: clean requirements.tox
-	DISABLE_ACCEPTANCE_TESTS=True tox -e $(PYTHON_ENV)-tests
+	DISABLE_ACCEPTANCE_TESTS=True tox -e $(PYTHON_ENV)-${TOXENV}
 
 validate: validate_python validate_js quality
 

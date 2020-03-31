@@ -66,7 +66,7 @@ edx-django-sites-extensions==2.4.3  # via -r requirements/test.txt
 edx-django-utils==3.1     # via -r requirements/test.txt, edx-drf-extensions
 edx-drf-extensions==5.0.2  # via -r requirements/test.txt, edx-rbac
 edx-ecommerce-worker==0.7.2  # via -r requirements/test.txt
-edx-i18n-tools==0.5.0     # via -r requirements/dev.in
+edx-i18n-tools==0.5.0     # via -r requirements/test.txt
 edx-opaque-keys==2.0.2    # via -r requirements/test.txt, edx-drf-extensions
 edx-rbac==1.1.2           # via -r requirements/test.txt
 edx-rest-api-client==1.9.2  # via -r requirements/e2e.txt, -r requirements/test.txt, edx-ecommerce-worker
@@ -111,7 +111,7 @@ pbr==5.4.4                # via -r requirements/test.txt, stevedore
 phonenumbers==8.12.1      # via -r requirements/test.txt, django-oscar, django-phonenumber-field
 pillow==7.0.0             # via -r requirements/test.txt, django-oscar
 pluggy==0.13.1            # via -r requirements/e2e.txt, -r requirements/test.txt, diff-cover, pytest, tox
-polib==1.1.0              # via edx-i18n-tools
+polib==1.1.0              # via -r requirements/test.txt, edx-i18n-tools
 premailer==2.9.2          # via -r requirements/test.txt
 psutil==1.2.1             # via -r requirements/test.txt, edx-django-utils
 ptvsd==4.3.2              # via -r requirements/dev.in

@@ -42,8 +42,26 @@ matrix:
         TESTNAME=quality-and-js
         TARGETS="requirements.js check_translations_up_to_date validate_translations clean_static static quality validate_js check_keywords"
     - python: 3.5
-      env: TESTNAME=test-python TARGETS="requirements.js clean_static static validate_python"
+      env:
+        TOXENV=django111-tests
+        TESTNAME=test-python
+        TARGETS="requirements.js clean_static static validate_python"
       after_success:
         - pip install -U codecov
         - docker exec ecommerce_testing /edx/app/ecommerce/ecommerce/.travis/run_coverage.sh
         - codecov
+    - python: 3.5
+      env:
+        TOXENV=django20-tests
+        TESTNAME=test-python
+        TARGETS="requirements.js clean_static static validate_python"
+    - python: 3.5
+      env:
+        TOXENV=django21-tests
+        TESTNAME=test-python
+        TARGETS="requirements.js clean_static static validate_python"
+    - python: 3.5
+      env:
+        TOXENV=django22-tests
+        TESTNAME=test-python
+        TARGETS="requirements.js clean_static static validate_python"
