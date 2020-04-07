@@ -5,9 +5,12 @@ from datetime import datetime
 from decimal import Decimal
 from urllib import urlencode
 
+import braintree
 import dateutil.parser
 import newrelic.agent
 import waffle
+from django.contrib.sites.shortcuts import get_current_site
+from django.conf import settings
 from django.http import HttpResponseBadRequest, HttpResponseRedirect
 from django.shortcuts import redirect, render
 from django.utils.html import escape
@@ -42,6 +45,7 @@ from ecommerce.extensions.order.exceptions import AlreadyPlacedOrderException
 from ecommerce.extensions.partner.shortcuts import get_partner_for_site
 from ecommerce.extensions.payment.constants import CLIENT_SIDE_CHECKOUT_FLAG_NAME
 from ecommerce.extensions.payment.forms import PaymentForm
+from ecommerce.extensions.payment.processors.braintree import Braintree
 
 BasketAttribute = get_model('basket', 'BasketAttribute')
 BasketAttributeType = get_model('basket', 'BasketAttributeType')
@@ -338,7 +342,10 @@ class BasketSummaryView(BasketView):
             payment_processor = payment_processor_class(self.request.site)
             current_year = datetime.today().year
 
+            braintree = Braintree(self.request.site)
+
             return {
+                'braintree_token': braintree.generate_client_token,
                 'client_side_payment_processor': payment_processor,
                 'enable_client_side_checkout': True,
                 'months': range(1, 13),

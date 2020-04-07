@@ -503,6 +503,7 @@ define([
                     BasketPage.detectCreditCard();
                 });
 
+<<<<<<< HEAD
                 $('#quantity-update').on('click', function(e) {
                     BasketPage.validateQuantity(e);
                 });
@@ -521,6 +522,53 @@ define([
                         BasketPage.sdnCheck(e);
                     }
                 });
+=======
+            // TODO This should only be done for credit card payment processors.
+            // $('#payment-button').click(function (e) {
+            //     _.each($('.help-block'), function (errorMsg) {
+            //         $(errorMsg).empty();  // Clear existing validation error messages.
+            //     });
+            //     $('.payment-form').attr('data-has-error', false);
+            //     if ($('#card-number').val()) {
+            //         detectCreditCard();
+            //     }
+            //     cardInfoValidation(e);
+            //     cardHolderInfoValidation(e);
+            //     if ($('input[name=sdn-check]').val() === 'enabled' && !$('.payment-form').data('has-error')) {
+            //         sdnCheck(e);
+            //     }
+            // });
+
+            // $paymentButtons.find('.payment-button').click(function (e) {
+            //     var $btn = $(e.target),
+            //         deferred = new $.Deferred(),
+            //         promise = deferred.promise(),
+            //         paymentProcessor = $btn.data('processor-name'),
+            //         data = {
+            //             basket_id: basketId,
+            //             payment_processor: paymentProcessor
+            //         };
+            //
+            //     Utils.disableElementWhileRunning($btn, function () {
+            //         return promise;
+            //     });
+            //     checkoutPayment(data);
+            // });
+
+            // Increment the quantity field until max
+            $('.spinner .btn:first-of-type').on('click', function () {
+                var btn = $(this),
+                    input = btn.closest('.spinner').find('input'),
+                    max = input.attr('max');
+
+                // Stop if max attribute is defined and value is reached to given max value
+                if (_.isUndefined(max) || parseInt(input.val()) < parseInt(max)) {
+                    input.val(parseInt(input.val()) + 1);
+                } else {
+                    btn.next('disabled', true);
+                }
+            });
+>>>>>>> df72301b64198860840d0e0a34c69d13d3288c04
 
                 // NOTE: We only include buttons that have a data-processor-name attribute because we don't want to
                 // go through the standard checkout process for some payment methods (e.g. Apple Pay).
