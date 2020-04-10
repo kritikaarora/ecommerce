@@ -42,6 +42,8 @@ from ecommerce.extensions.order.exceptions import AlreadyPlacedOrderException
 from ecommerce.extensions.partner.shortcuts import get_partner_for_site
 from ecommerce.extensions.payment.constants import CLIENT_SIDE_CHECKOUT_FLAG_NAME
 from ecommerce.extensions.payment.forms import PaymentForm
+from ecommerce.extensions.payment.processors.braintree import Braintree
+
 
 BasketAttribute = get_model('basket', 'BasketAttribute')
 BasketAttributeType = get_model('basket', 'BasketAttributeType')
@@ -337,8 +339,29 @@ class BasketSummaryView(BasketView):
         if payment_processor_class:
             payment_processor = payment_processor_class(self.request.site)
             current_year = datetime.today().year
+            #import pdb;pdb.set_trace()
+            try:
+                # Ist method
+                # import braintree
+                # from django.conf import settings
+                # partner_short_code = request.site.siteconfiguration.partner.short_code
+                # braintree_config = settings.PAYMENT_PROCESSOR_CONFIG[partner_short_code.lower()]['braintree']
+                # braintree.Configuration.configure(braintree.Environment.Sandbox,
+                #                                   merchant_id=braintree_config['merchant_id'],
+                #                                   public_key=braintree_config['public_key'],
+                #                                   private_key=braintree_config['private_key'])
+                # # request.session['braintree_client_token'] = braintree.ClientToken.generate()
+                # braintree_client_token = braintree.ClientToken.generate()
+                # 2nd method
+                braintree_processor_object = Braintree(self.request.site)
+                braintree_client_token = braintree_processor_object.generate_client_token()
+                logger.info(' braintree client token generated[%s].', request.session['braintree_client_token'])
+            except Exception as e:
+                logger.error('error while braintree client token generation[%s].', e)
+                braintree_client_token = None
 
             return {
+                'braintree_client_token': braintree_client_token,
                 'client_side_payment_processor': payment_processor,
                 'enable_client_side_checkout': True,
                 'months': range(1, 13),

@@ -1,0 +1,18 @@
+{% load compress %}
+{% load static %}
+
+
+<script type="text/javascript">
+    window.BraintreeConfig = {
+        postUrl: '{% url 'braintree:submit' %}',
+        client_token: '{{request.session.braintree_client_token}}',
+        paymentRequest: {
+            currency: '{{ basket.currency|lower }}',
+            label: '{{ platform_name }}',
+            // NOTE: Stripe expects the currency sub-unit (e.g. cents instead of dollars).
+            // widthratio is used to avoid having to write extra code for multiplication.
+            total: {% widthratio order_total.incl_tax 1 100 %}
+        }
+    }
+</script>
+<script src="{% static 'js/views/braintree.js' %}" type="text/javascript"></script>
