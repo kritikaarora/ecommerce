@@ -5,7 +5,7 @@
 <script type="text/javascript">
     window.BraintreeConfig = {
         postUrl: '{% url 'braintree:submit' %}',
-        client_token: '{{request.session.braintree_client_token}}',
+        client_token: '{{braintree_client_token}}',
         paymentRequest: {
             currency: '{{ basket.currency|lower }}',
             label: '{{ platform_name }}',

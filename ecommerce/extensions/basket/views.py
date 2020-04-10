@@ -334,12 +334,13 @@ class BasketSummaryView(BasketView):
             basket view context needs to be updated with.
         """
         site_configuration = self.request.site.siteconfiguration
+        import pdb;pdb.set_trace()
         payment_processor_class = site_configuration.get_client_side_payment_processor_class()
 
         if payment_processor_class:
             payment_processor = payment_processor_class(self.request.site)
             current_year = datetime.today().year
-            #import pdb;pdb.set_trace()
+            import pdb;pdb.set_trace()
             try:
                 # Ist method
                 # import braintree
@@ -353,9 +354,12 @@ class BasketSummaryView(BasketView):
                 # # request.session['braintree_client_token'] = braintree.ClientToken.generate()
                 # braintree_client_token = braintree.ClientToken.generate()
                 # 2nd method
-                braintree_processor_object = Braintree(self.request.site)
-                braintree_client_token = braintree_processor_object.generate_client_token()
-                logger.info(' braintree client token generated[%s].', request.session['braintree_client_token'])
+                #braintree_processor_object = Braintree(self.request.site)
+                if payment_processor.NAME=='braintree':
+                	braintree_client_token =payment_processor.generate_client_token()
+                	logger.info(' braintree client token generated[%s].', request.session['braintree_client_token'])
+                else:
+			braintree_client_token=None
             except Exception as e:
                 logger.error('error while braintree client token generation[%s].', e)
                 braintree_client_token = None

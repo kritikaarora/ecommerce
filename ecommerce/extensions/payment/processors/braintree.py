@@ -26,7 +26,7 @@ SourceType = get_model('payment', 'SourceType')
 
 
 class Braintree(ApplePayMixin, BaseClientSidePaymentProcessor):
-    NAME = 'Braintree'
+    NAME = 'braintree'
     template_name = 'payment/braintree.html'
 
     def __init__(self, site):
@@ -36,17 +36,18 @@ class Braintree(ApplePayMixin, BaseClientSidePaymentProcessor):
         Raises:
             KeyError: If no settings configured for this payment processor.
         """
-        super(Stripe, self).__init__(site)
+        super(Braintree, self).__init__(site)
         configuration = self.configuration
         # if settings.BRAINTREE_PRODUCTION:
         #     braintree_env = braintree.Environment.Production
         # else:
         #     braintree_env = braintree.Environment.Sandbox
-        self.braintree_env = configuration['braintree_env']
+        braintree_env = braintree.Environment.Sandbox
+        self.braintree_env = braintree_env
         self.merchant_id = configuration['merchant_id']
         self.public_key = configuration['public_key']
         self.private_key = configuration['private_key']
-
+        
         # Configure Braintree
         braintree.Configuration.configure(
             self.braintree_env,

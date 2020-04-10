@@ -7,7 +7,7 @@ from ecommerce.extensions.basket.utils import basket_add_organization_attribute
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.payment.forms import BraintreeSubmitForm
-from ecommerce.extensions.payment.processors.stripe import Braintree
+from ecommerce.extensions.payment.processors.braintree import Braintree
 from ecommerce.extensions.payment.views import BasePaymentSubmitView
 
 logger = logging.getLogger(__name__)
@@ -19,7 +19,7 @@ NoShippingRequired = get_class('shipping.methods', 'NoShippingRequired')
 OrderTotalCalculator = get_class('checkout.calculators', 'OrderTotalCalculator')
 
 
-class StripeSubmitView(EdxOrderPlacementMixin, BasePaymentSubmitView):
+class BraintreeSubmitView(EdxOrderPlacementMixin, BasePaymentSubmitView):
     """ Stripe payment handler.
 
     The payment form should POST here. This view will handle creating the charge at Stripe, creating an order,
@@ -43,7 +43,7 @@ class StripeSubmitView(EdxOrderPlacementMixin, BasePaymentSubmitView):
         try:
             billing_address = None
             # self.payment_processor.get_address_from_token(token)
-            TODO shift this to self.payment_processor.get_address_from_token(token)
+            #TODO shift this to self.payment_processor.get_address_from_token(token)
             # address_dict = {
             #     "first_name": self.user.first_name,
             #     "last_name": self.user.last_name,
