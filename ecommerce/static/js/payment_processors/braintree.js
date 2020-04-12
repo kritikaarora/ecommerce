@@ -11,8 +11,9 @@ require.config({
       "https://js.braintreegateway.com/web/3.60.0/js/hosted-fields.min",
   },
 });
-define(["jquery", "braintreeClient", "hostedFields"], function (
+define(["jquery", 'braintree', "braintreeClient", "hostedFields"], function (
   $,
+  braintree,
   client,
   hostedFields
 ) {
@@ -21,6 +22,7 @@ define(["jquery", "braintreeClient", "hostedFields"], function (
   return {
     init: function (config) {
       this.client_token = config.client_token;
+      this.client = null;
       this.postUrl = config.postUrl;
       this.$paymentForm = $("#paymentForm");
       this.paymentRequestConfig = {
@@ -31,58 +33,16 @@ define(["jquery", "braintreeClient", "hostedFields"], function (
           amount: config.paymentRequest.total,
         },
       };
-      client.create(
-        {
-          authorization: this.client_token,
-        },
-        function (err, clientInstance) {
-          if (err) {
-            displayErrorMessage(err);
-            console.log(err);
-            return;
-          } else {
-            hostedFields.create(
-              {
-                client: clientInstance,
-                styles: {
-                  input: {
-                    // change input styles to match
-                    // bootstrap styles
-                    "font-size": "1rem",
-                    color: "#495057",
-                  },
-                },
-                fields: {
-                  number: {
-                    selector: "#card-number",
-                    placeholder: "4111 1111 1111 1111",
-                  },
-                  cvv: {
-                    selector: "#card-cvn",
-                    placeholder: "123",
-                  },
-                  expirationDate: {
-                    selector: "#expiration-date",
-                    placeholder: "MM / YY",
-                  },
-                },
-              },
-              function (err, hostedFieldsInstance) {
-                if (err) {
-                  console.error(err);
-                  displayErrorMessage(err);
-                  return;
-                } else {
-                  console.log(hostedFieldsInstance);
-                  window.BraintreeConfig[
-                    "hostedFieldsInstance"
-                  ] = hostedFieldsInstance;
-                }
-              }
-            );
-          }
+      client.create({
+        authorization: this.client_token
+      }, function (clientErr, clientInstance) {
+        if (clientErr) {
+          console.log(clientErr);
+          return;
         }
-      );
+        // alert('balle balle')
+        window.BraintreeConfig.client = clientInstance
+      });
       this.$paymentForm.on("submit", $.proxy(this.onPaymentFormSubmit, this));
       //this.initializePaymentRequest();
     },
@@ -102,7 +62,6 @@ define(["jquery", "braintreeClient", "hostedFields"], function (
           id_country: "address_country",
         },
         $paymentForm = $("#paymentForm");
-
       // Extract the form data so that it can be incorporated into our token request
       Object.keys(fieldMappings).forEach(function (id) {
         data[fieldMappings[id]] = $("#" + id, $paymentForm).val();
@@ -114,66 +73,48 @@ define(["jquery", "braintreeClient", "hostedFields"], function (
       $paymentForm.find("#payment-button").prop("disabled", true);
 
       // Request a token from Braintree
-      window.BraintreeConfig["hostedFieldsInstance"].tokenize(
-        data,
-        $.proxy(this.onCreateCardToken, this)
-      );
-
+      // window.BraintreeConfig["hostedFieldsInstance"].tokenize(
+      //   data,
+      //   $.proxy(this.onCreateCardToken, this)
+      // );
       e.preventDefault();
+      var values = {
+        number: data.number,
+        expirationDate: data.exp_month + '/' + data.exp_year,
+        cvv: data.cvc,
+        billingAddress: {
+          postalCode: data.address_zip
+        }
+      }
+      window.BraintreeConfig.client.request({
+        endpoint: 'payment_methods/credit_cards',
+        method: 'post',
+        data: {
+          creditCard: values
+        }
+      }, $.proxy(this.onCreateCardToken, this))
     },
 
-    onCreateCardToken: function (tokenizeErr, payload) {
-      if (tokenizeErr) {
-        switch (tokenizeErr.code) {
-          case "HOSTED_FIELDS_FIELDS_EMPTY":
-            console.error("All fields are empty! Please fill out the form.");
-            msg =
-              gettext("All fields are empty! Please fill out the form.") +
-              "<br><br>Debug Info: " +
-              tokenizeErr.code;
-            break;
-          case "` `":
-            console.error(
-              "Some fields are invalid:",
-              tokenizeErr.details.invalidFieldKeys
-            );
-            msg =
-              gettext(
-                "Some fields are invalid:" +
-                  tokenizeErr.details.invalidFieldKeys
-              ) +
-              "<br><br>Debug Info: " +
-              tokenizeErr.code;
-            break;
-          case "HOSTED_FIELDS_FAILED_TOKENIZATION":
-            console.error(
-              "Tokenization failed server side. Is the card valid?"
-            );
-            msg =
-              gettext("okenization failed server side. Is the card valid?") +
-              "<br><br>Debug Info: " +
-              tokenizeErr.code;
-            break;
-          case "HOSTED_FIELDS_TOKENIZATION_NETWORK_ERROR":
-            console.error("Network error occurred when tokenizing.");
-            msg =
-              gettext("Network error occurred when tokenizing.") +
-              "<br><br>Debug Info: " +
-              tokenizeErr.code;
-            break;
-          default:
-            console.error("Something bad happened!", tokenizeErr);
-            msg =
-              gettext("Something bad happened!") +
-              "<br><br>Debug Info: " +
-              tokenizeErr.code;
+    onCreateCardToken: function (err, result) {
+      var rawRequestError;
+
+      if (err) {
+        rawRequestError = err.details.originalError;
+
+        if (rawRequestError.fieldErrors && rawRequestError.fieldErrors.length > 0) {
+          renderFieldErrors(rawRequestError.fieldErrors[0].fieldErrors);
+        } else {
+          console.log('Something unexpected went wrong.');
+          console.log(err);
         }
-        this.displayErrorMessage(msg);
         this.$paymentForm.find("#payment-button").prop("disabled", false); // Re-enable submission
-      } else {
-        alert("Got nonce:", payload.nonce);
-        console.log("Got nonce:", payload.nonce);
-        this.postNonceToServer(payload.nonce);
+        return;
+      }
+
+      else {
+        // alert("Got nonce:", result.creditCards[0].nonce);
+        console.log("Got nonce:", result.creditCards[0].nonce);
+        this.postTokenToServer(result.creditCards[0].nonce);
       }
     },
 
@@ -181,7 +122,7 @@ define(["jquery", "braintreeClient", "hostedFields"], function (
       var self = this,
         formData = new FormData();
 
-      formData.append("stripe_token", token);
+      formData.append("payment_method_nonce", token);
       formData.append(
         "csrfmiddlewaretoken",
         $("[name=csrfmiddlewaretoken]", self.$paymentForm).val()
@@ -212,7 +153,7 @@ define(["jquery", "braintreeClient", "hostedFields"], function (
           self.displayErrorMessage(
             gettext(
               "An error occurred while processing your payment. " +
-                "Please try again."
+              "Please try again."
             )
           );
         }

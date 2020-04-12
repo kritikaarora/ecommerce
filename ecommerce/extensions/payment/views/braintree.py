@@ -29,7 +29,7 @@ class BraintreeSubmitView(EdxOrderPlacementMixin, BasePaymentSubmitView):
 
     @property
     def payment_processor(self):
-        return Stripe(self.request.site)
+        return Braintree(self.request.site)
 
     def form_valid(self, form):
         form_data = form.cleaned_data
@@ -38,7 +38,7 @@ class BraintreeSubmitView(EdxOrderPlacementMixin, BasePaymentSubmitView):
         order_number = basket.order_number
 
         basket_add_organization_attribute(basket, self.request.POST)
-        log.info('form data[%s]', self.request.POST)
+        logger.info('form data[%s]', self.request.POST)
 
         try:
             billing_address = None

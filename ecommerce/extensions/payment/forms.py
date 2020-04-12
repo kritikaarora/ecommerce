@@ -254,7 +254,7 @@ class BraintreeSubmitForm(forms.Form):
     )
 
     def __init__(self, user, request, *args, **kwargs):
-        super(StripeSubmitForm, self).__init__(*args, **kwargs)
+        super(BraintreeSubmitForm, self).__init__(*args, **kwargs)
         self.request = request
         update_basket_queryset_filter(self, user)
 

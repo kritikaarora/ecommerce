@@ -47,7 +47,7 @@ class Braintree(ApplePayMixin, BaseClientSidePaymentProcessor):
         self.merchant_id = configuration['merchant_id']
         self.public_key = configuration['public_key']
         self.private_key = configuration['private_key']
-        
+
         # Configure Braintree
         braintree.Configuration.configure(
             self.braintree_env,
@@ -69,19 +69,13 @@ class Braintree(ApplePayMixin, BaseClientSidePaymentProcessor):
         token = response
         order_number = basket.order_number
         currency = basket.currency
-        amount = self._get_basket_amount(basket),
-
+        amount = self._get_basket_amount(basket)
+        print(amount)
+	address_dict=None
         # NOTE: In the future we may want to get/create a Customer. See https://stripe.com/docs/api#customers.
         result = braintree.Transaction.sale({
-            # "customer_id": customer_id,
-            "amount": amount,
+            "amount": str(amount),
             "payment_method_nonce": token,
-            # "descriptor": {
-            #     # Definitely check out https://developers.braintreepayments.com/reference/general/validation-errors/all/python#descriptor
-            #     "name": "COMPANY.*test",
-            # },
-            "billing": address_dict,
-            "shipping": address_dict,
             "options": {
                 # Use this option to store the customer data, if successful
                 #  'store_in_vault_on_success': True,
@@ -89,12 +83,13 @@ class Braintree(ApplePayMixin, BaseClientSidePaymentProcessor):
                 # If you want to settle the transaction later, use ``False`` and later on
                 # ``braintree.Transaction.submit_for_settlement("the_transaction_id")``
                 'submit_for_settlement': True,
-            },
+            }
         })
         if result.is_success:
             transaction = result.transaction
-            label = None
+            label = '4111111111111111'
             card_type = None
+            print(transaction)
 
             if transaction.payment_instrument_type == 'paypal_account':
                 card_type = 'PayPal'
@@ -103,10 +98,11 @@ class Braintree(ApplePayMixin, BaseClientSidePaymentProcessor):
             return HandledProcessorResponse(
                 transaction_id=transaction.id,
                 total=transaction.amount,
-                currency=transaction.currency,
+                currency=basket.currency,
                 card_number=label,
-                card_type=card_type
+                card_type='American Express'
             )
+
         else:
             raise GatewayError(result.message)
         # try:
